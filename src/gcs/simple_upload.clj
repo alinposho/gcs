@@ -25,3 +25,13 @@
 (->> (get-access-token) (upload gcs-file) :body (json/read-str))
 
 
+(defn get-object-contents 
+  [{:keys [bucket filename]} access_token]
+  (let [url (str "https://www.googleapis.com/storage/v1beta2/b/" bucket "/o/" filename "?alt=media")]
+    (client/get url
+                {:headers {"Authorization" (str "Bearer " access_token)}
+                 :throw-entire-message? true})))
+;(->> (get-access-token) (get-object gcs-file) :body (json/read-str))
+(->> (get-access-token) (get-object-contents {:bucket "testbucket003" :filename "some_folder%2Fblah.txt"}) :body)
+
+

@@ -3,7 +3,8 @@
     [clj-http.client :as client]
     [clj-jwt.core  :refer :all]
     [clj-jwt.key   :refer [private-key]]
-    [clj-time.core :refer [now plus hours]]))
+    [clj-time.core :refer [now plus hours]]
+    [clojure.data.json :as json]))
 
 (def claim
   {:iss "534154772173-cmpe0j9ae4tl8pd50av8f891lhhftqdf@developer.gserviceaccount.com"
@@ -16,12 +17,30 @@
 
 (defn req-token 
   [claim rsa-prv-key]
-  (client/post "https://accounts.google.com/o/oauth2/token"
-    {:body (str "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" (-> claim jwt (sign :RS256 rsa-prv-key) to-str))
-     :content-type "application/x-www-form-urlencoded"
-     :socket-timeout 5000  ;; in milliseconds
-     :conn-timeout 5000    ;; in milliseconds
-;     :throw-entire-message? true
-     }))
+  (let [jwt-assertion (-> claim jwt (sign :RS256 rsa-prv-key) to-str)]
+    (client/post "https://accounts.google.com/o/oauth2/token"
+                 {:body (str 
+                          "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" 
+                          jwt-assertion)
+                  :content-type "application/x-www-form-urlencoded"
+                  :socket-timeout 5000  ;; in milliseconds
+                  :conn-timeout 5000    ;; in milliseconds
+                  })))
 
-(req-token claim rsa-prv-key)
+(defn get-token-from-json-string
+  "Extracts the OAuth token from a JSON string that looks like this
+{
+  \"access_token\": \"ya29.1.AADtN_UebjMlWtlWqOCgkTVzss0LAPvNcriRzRnVEFrWvzHFdDFFa6qfQGufmTk\", 
+  \"token_type\": \"Bearer\", 
+  \"expires_in\": 3600
+}"
+  [json-string]
+  ((json/read-str json-string) "access_token"))
+
+(get-token-from-json-string (:body (req-token claim rsa-prv-key)))
+
+
+
+
+
+

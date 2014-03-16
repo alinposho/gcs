@@ -21,17 +21,17 @@
                 :throw-entire-message? true
                 })))
 
-(def gcs-file (GCS. "testbucket003" "some_folder/blah.txt" "This is a test content"))
-(->> (get-access-token) (upload gcs-file) :body (json/read-str))
-
-
-(defn get-object-contents 
+(defn get-object-contents
+  "Gets the contents of the specified object from the Google Cloud Storage. 
+   Please note that the filename should be URL encoded"
   [{:keys [bucket filename]} access_token]
   (let [url (str "https://www.googleapis.com/storage/v1beta2/b/" bucket "/o/" filename "?alt=media")]
     (client/get url
                 {:headers {"Authorization" (str "Bearer " access_token)}
                  :throw-entire-message? true})))
-;(->> (get-access-token) (get-object gcs-file) :body (json/read-str))
-(->> (get-access-token) (get-object-contents {:bucket "testbucket003" :filename "some_folder%2Fblah.txt"}) :body)
+
+;(def gcs-file (GCS. "testbucket003" "some_folder/blah.txt" "This is a test content"))
+;(->> (get-access-token) (upload gcs-file) :body (json/read-str))
+;(->> (get-access-token) (get-object-contents {:bucket "testbucket003" :filename "some_folder%2Fblah.txt"}) :body)
 
 

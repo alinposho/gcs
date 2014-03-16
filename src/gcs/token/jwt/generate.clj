@@ -12,6 +12,7 @@
    :exp (plus (now) (days 1))
    :iat (now)})
 
+(def rsa-prv-key (private-key "resources/226c3a26c8ab392813eb0a1ac4522798233d376c-privatekey.pem"))
 
 ;(def sample-claim 
 ;  {:iss "761326798069-r5mljlln1rd4lrbhg75efgigp36m78j5@developer.gserviceaccount.com",
@@ -20,4 +21,6 @@
 ;   :exp "1328554385"
 ;   :iat "1328550785"})
 
-(-> claim jwt to-str)
+;(-> claim jwt to-str)
+;(-> claim jwt (sign :RS256 rsa-prv-key) to-str)
+

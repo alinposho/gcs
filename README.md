@@ -1,6 +1,6 @@
 # gcs
 
-A Clojure library designed to ... well, that part is up to you.
+A Clojure project that is designed to explore the Google Cloud Storage API. We will decide if this is to become a library
 
 ## Usage
 

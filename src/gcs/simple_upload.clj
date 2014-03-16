@@ -5,11 +5,13 @@
     [clojure.data.json :as json]
     [gcs.oauth.token.request :refer :all]))
 
-(defrecord GcsFile [bucket name content])
+(defrecord GCS [bucket filename content])
 
 (defn upload
-  [{:keys [bucket name content]} access_token]
-  (let [url (str "https://www.googleapis.com/upload/storage/v1beta2/b/" bucket "/o?uploadType=media&name=" name)]
+  "Uploads a file that has a small content to the Google Cloud Storage 
+   bucket using the access token"
+  [{:keys [bucket filename content]} access_token]
+  (let [url (str "https://www.googleapis.com/upload/storage/v1beta2/b/" bucket "/o?uploadType=media&name=" filename)]
   (client/post url
                {:body content
                 :content-type "text/plain"
@@ -19,7 +21,7 @@
                 :throw-entire-message? true
                 })))
 
-(def gcs-file (GcsFile. "testbucket003" "some_folder/blah.txt" "This is a test content"))
+(def gcs-file (GCS. "testbucket003" "some_folder/blah.txt" "This is a test content"))
 (->> (get-access-token) (upload gcs-file) :body (json/read-str))
 
 

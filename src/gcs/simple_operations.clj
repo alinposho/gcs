@@ -1,4 +1,4 @@
-(ns gcs.simple-upload
+(ns gcs.simple-operations
   (:require 
     [clj-http.client :as client]
     [clj-jwt.key   :refer [private-key]]
@@ -37,9 +37,18 @@ Please note that the filename should be URL encoded"
   [gcs-object-info]
   (get-object (assoc gcs-object-info :params "?alt=media")))
 
-;(def gcs-file (GCS. "testbucket003" "some_folder/blah.txt" "This is a test content"))
-;(->> (get-access-token) (upload gcs-file) :body (json/read-str))
-;(-> (get-object-contents {:bucket "testbucket003" :filename "some_folder%2Fblah.txt" :access-token (get-access-token)}) :body)
-;(-> (get-object {:bucket "testbucket003" :filename "some_folder%2Fblah.txt" :access-token (get-access-token)}) :body)
+(comment
 
+(load-file "src/gcs/simple_operations.clj")
+(refer 'gcs.simple-operations)
 
+(def gcs-file (GCS. "testbucket003" "some_folder/blah.txt" "This is a test content"))
+(->> (get-access-token) (upload gcs-file) :body (json/read-str))
+(-> (get-object-contents 
+      {:bucket "testbucket003" 
+       :filename "some_folder%2Fblah.txt" 
+       :access-token (get-access-token)}) 
+    :body)
+(-> (get-object {:bucket "testbucket003" :filename "some_folder%2Fblah.txt" :access-token (get-access-token)}) :body)
+
+)

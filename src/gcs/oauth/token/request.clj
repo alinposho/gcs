@@ -32,18 +32,24 @@
 (def rsa-prv-key (private-key "resources/privatekey.pem"))
 (defn get-access-token [] (get-token-from-json-string (:body (req-token (jwt/create-gcs-jwt-assertion claim rsa-prv-key)))))
 
+(comment
 
-;(get-token-from-json-string "
-;{
-;  \"access_token\": \"ya29.1.AADtN_UebjMlWtlWqOCgkTVzss0LAPvNcriRzRnVEFrWvzHFdDFFa6qfQGufmTk\", 
-;  \"token_type\": \"Bearer\", 
-;  \"expires_in\": 3600
-;}")
+(load-file "src/gcs/oauth/token/request.clj")
+(refer 'gcs.oauth.token.request)
 
-;(def claim (jwt/create-claim (client-email (config)) (gcs-permission-scope (config))))
-;(def rsa-prv-key (private-key "resources/privatekey.pem"))
-;(get-token-from-json-string (:body (req-token (jwt/create-gcs-jwt-assertion claim rsa-prv-key))))
-;(req-token (jwt/create-gcs-jwt-assertion claim rsa-prv-key))
+(get-token-from-json-string "
+{
+ \"access_token\": \"ya29.1.AADtN_UebjMlWtlWqOCgkTVzss0LAPvNcriRzRnVEFrWvzHFdDFFa6qfQGufmTk\", 
+ \"token_type\": \"Bearer\", 
+ \"expires_in\": 3600
+}")
+
+(def claim (jwt/create-claim (client-email (config)) (gcs-permission-scope (config))))
+(def rsa-prv-key (private-key "resources/privatekey.pem"))
+(get-token-from-json-string (:body (req-token (jwt/create-gcs-jwt-assertion claim rsa-prv-key))))
+(req-token (jwt/create-gcs-jwt-assertion claim rsa-prv-key))
+
+)
 
 
 

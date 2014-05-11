@@ -37,6 +37,11 @@ Please note that the filename should be URL encoded"
   [gcs-object-info]
   (get-object (assoc gcs-object-info :params "?alt=media")))
 
+(defn get-object-metadata
+  "Gets the metadata of the specified object from the Google Cloud Storage"
+  [gcs-object-info]
+  (get-object gcs-object-info))
+
 (comment
 
 (load-file "src/gcs/simple_operations.clj")
@@ -44,11 +49,14 @@ Please note that the filename should be URL encoded"
 
 (def gcs-file (GCS. "testbucket003" "some_folder/blah.txt" "This is a test content"))
 (->> (get-access-token) (upload gcs-file) :body (json/read-str))
-(-> (get-object-contents 
+(-> (get-object-contents {:bucket "testbucket003" 
+                       :filename "some_folder%2Fblah.txt" 
+                       :access-token (get-access-token)}) 
+    :body)
+(-> (get-object-metadata 
       {:bucket "testbucket003" 
        :filename "some_folder%2Fblah.txt" 
        :access-token (get-access-token)}) 
     :body)
-(-> (get-object {:bucket "testbucket003" :filename "some_folder%2Fblah.txt" :access-token (get-access-token)}) :body)
 
 )

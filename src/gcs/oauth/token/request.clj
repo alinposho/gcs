@@ -4,7 +4,7 @@
     [clj-jwt.key   :refer [private-key]]
     [clojure.data.json :as json]
     [gcs.oauth.token.jwt :as jwt]
-    [gcs.config :refer [client-email gcs-permission-scope config]]))
+    [gcs.config :refer [read-gcs-config]]))
 
 (defn req-token 
   [jwt-assertion]
@@ -28,9 +28,14 @@
   [json-string]
   ((json/read-str json-string) "access_token"))
 
-(def claim (jwt/create-claim (client-email (config)) (gcs-permission-scope (config))))
-(def rsa-prv-key (private-key "resources/privatekey.pem"))
-(defn get-access-token [] (get-token-from-json-string (:body (req-token (jwt/create-gcs-jwt-assertion claim rsa-prv-key)))))
+(defn get-access-token [] 
+  (let [gcs-config (read-gcs-config)
+        claim (jwt/create-claim (:client-email gcs-config) (:permission-scope gcs-config))
+        rsa-prv-key (private-key "resources/privatekey.pem")]
+  (-> (jwt/create-gcs-jwt-assertion claim rsa-prv-key) 
+      (req-token)
+      :body
+      (get-token-from-json-string)))
 
 (comment
 
@@ -44,10 +49,12 @@
  \"expires_in\": 3600
 }")
 
-(def claim (jwt/create-claim (client-email (config)) (gcs-permission-scope (config))))
+(def gcs-config (read-gcs-config))
+(def claim (jwt/create-claim (:client-email gcs-config) (:permission-scope gcs-config))
 (def rsa-prv-key (private-key "resources/privatekey.pem"))
 (get-token-from-json-string (:body (req-token (jwt/create-gcs-jwt-assertion claim rsa-prv-key))))
 (req-token (jwt/create-gcs-jwt-assertion claim rsa-prv-key))
+(get-access-token)
 
 )
 

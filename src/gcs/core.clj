@@ -4,7 +4,8 @@
     [clj-jwt.key   :refer [private-key]]
     [clojure.data.json :as json]
     [gcs.oauth.token.request :refer [get-access-token]]
-    [gcs.simple-operations :as ops]))
+    [gcs.simple-operations :as ops])
+   (:import [java.net URLEncoder]))
 
 (defprotocol GcsOps
 	"A protocol for performing upload, get and delete operations"
@@ -17,12 +18,17 @@
 	)
 
 (defrecord GCS [bucket filename content])
+
 (extend-type GCS
 	GcsOps
 	(upload [this]  
  		 (ops/upload this (get-access-token)))
 	(get-contents [this]
-		((ops/get-object-contents this) :body)))
+		(let [content (-> (ops/get-object-contents {:bucket (:bucket this)
+							                        :filename (URLEncoder/encode (:filename this) "UTF-8")
+							                        :access-token (get-access-token)}) 
+						  :body)]
+		(assoc this :content content)))
 
 (comment
 
@@ -32,12 +38,13 @@
 (def gcs-file (->GCS "testbucket003" "some_folder/blah.txt" "This is a test content"))
 
 (upload gcs-file)
+(get-contents (assoc gcs-file :content "nothing"))
 
 (->> (get-access-token) 
      (upload gcs-file) 
      :body 
      (json/read-str))
-(-> (get-object-contents {:bucket "testbucket003" 
+(-> (ops/get-object-contents {:bucket "testbucket003" 
                        :filename "some_folder%2Fblah.txt" 
                        :access-token (get-access-token)}) 
     :body)

@@ -35,7 +35,7 @@
   (-> (jwt/create-gcs-jwt-assertion claim rsa-prv-key) 
       (req-token)
       :body
-      (get-token-from-json-string)))
+      (get-token-from-json-string))))
 
 (comment
 
@@ -50,7 +50,7 @@
 }")
 
 (def gcs-config (read-gcs-config))
-(def claim (jwt/create-claim (:client-email gcs-config) (:permission-scope gcs-config))
+(def claim (jwt/create-claim (:client-email gcs-config) (:permission-scope gcs-config)))
 (def rsa-prv-key (private-key "resources/privatekey.pem"))
 (get-token-from-json-string (:body (req-token (jwt/create-gcs-jwt-assertion claim rsa-prv-key))))
 (req-token (jwt/create-gcs-jwt-assertion claim rsa-prv-key))

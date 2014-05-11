@@ -18,9 +18,15 @@
   [claim rsa-prv-key]
   (-> claim jwt (sign :RS256 rsa-prv-key) to-str))
 
-;(def rsa-prv-key (private-key "resources/226c3a26c8ab392813eb0a1ac4522798233d376c-privatekey.pem"))
-;(create-gcs-jwt-assertion (create-claim "smth@developer.gserviceaccount.com" "read_write") rsa-prv-key)
-;(create-claim "smth@developer.gserviceaccount.com" "read_write")
-;(-> claim jwt to-str)
-;(-> claim jwt (sign :RS256 rsa-prv-key) to-str)
+(comment
+  
+(load-file "src/gcs/oauth/token/jwt.clj")
+(refer 'gcs.oauth.token.jwt)
 
+(def rsa-prv-key (private-key "resources/privatekey.pem"))
+(create-gcs-jwt-assertion (create-claim "smth@developer.gserviceaccount.com" "read_write") rsa-prv-key)
+(def claim (create-claim "smth@developer.gserviceaccount.com" "read_write"))
+(-> claim jwt to-str)
+(-> claim jwt (sign :RS256 rsa-prv-key) to-str)
+
+)

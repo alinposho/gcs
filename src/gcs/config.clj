@@ -34,7 +34,7 @@
 (permission-scope (config))
 
 (def gcs-config (read-gcs-config))
-(client-email gcs-config)
-(permission-scope gcs-config)
+(:client-email gcs-config)
+(:permission-scope gcs-config)
 
 )

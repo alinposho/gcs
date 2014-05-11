@@ -5,8 +5,6 @@
     [clojure.data.json :as json]
     [gcs.oauth.token.request :refer :all]))
 
-(defrecord GCS [bucket filename content])
-
 (defn upload
   "Uploads a file that has a small content to the Google Cloud Storage 
    bucket using the access token"
@@ -42,13 +40,25 @@ Please note that the filename should be URL encoded"
   [gcs-object-info]
   (get-object gcs-object-info))
 
+(defn delete 
+  [{:keys [bucket filename access-token params]}]
+  (let [url (str "https://www.googleapis.com/storage/v1/b/" bucket "/o/" filename)]
+    (client/delete url
+                {:headers {"Authorization" (str "Bearer " access-token)}
+                 :throw-entire-message? true})))
+
 (comment
 
 (load-file "src/gcs/simple_operations.clj")
 (refer 'gcs.simple-operations)
 
-(def gcs-file (GCS. "testbucket003" "some_folder/blah.txt" "This is a test content"))
-(->> (get-access-token) (upload gcs-file) :body (json/read-str))
+(def gcs-file {:bucket "testbucket003" 
+               :filename "some_folder/blah.txt" 
+               :content "This is a test content"})
+(->> (get-access-token) 
+     (upload gcs-file) 
+     :body 
+     (json/read-str))
 (-> (get-object-contents {:bucket "testbucket003" 
                        :filename "some_folder%2Fblah.txt" 
                        :access-token (get-access-token)}) 
@@ -58,5 +68,9 @@ Please note that the filename should be URL encoded"
        :filename "some_folder%2Fblah.txt" 
        :access-token (get-access-token)}) 
     :body)
+
+(delete {:bucket "testbucket003" 
+         :filename "some_folder%2Fblah.txt" 
+         :access-token (get-access-token)}) 
 
 )

@@ -9,7 +9,7 @@
 
 (defprotocol GcsOps
 	"A protocol for performing upload, get and delete operations"
-	(upload [this] "Uploads a file that has a small(i.e. no streaming involved) content to the Google Cloud Storage")
+	(upload [this content] "Uploads a file that has a small(i.e. no streaming involved) content to the Google Cloud Storage")
 	(get-contents [this] "Gets the contents of the specified object from the Google Cloud Storage.
 		Please note that the filename should be URL encoded")
 	(get-metadata [this] "Gets the metadata of the specified object from the Google Cloud Storage")
@@ -17,42 +17,34 @@
 		Deletions are permanent if versioning is not enabled for the bucket, or if the generation parameter is used.")
 	)
 
-(defrecord GCS [bucket filename content])
+(defrecord GcsMeta [bucket filename])
 
-(extend-type GCS
+(extend-type GcsMeta
 	GcsOps
-	(upload [this]  
- 		 (ops/upload this (get-access-token)))
+	(upload [this content]  
+ 		 (ops/upload (assoc this :content content) (get-access-token)))
 	(get-contents [this]
-		(let [content (-> (ops/get-object-contents {:bucket (:bucket this)
-							                        :filename (URLEncoder/encode (:filename this) "UTF-8")
-							                        :access-token (get-access-token)}) 
-						  :body)]
-		(assoc this :content content)))
+		(let [url-encoded-filename (URLEncoder/encode (:filename this) "UTF-8")
+          access-token (get-access-token)
+          req-params (assoc this :filename url-encoded-filename :access-token access-token)]
+		{:content (-> (ops/get-object-contents req-params) 
+                  :body)}))
+  (delete [this]
+    (let [url-encoded-filename (URLEncoder/encode (:filename this) "UTF-8")
+          access-token (get-access-token)
+          req-params (assoc this :filename url-encoded-filename :access-token access-token)]
+      (ops/delete req-params))))
 
 (comment
 
 (load-file "src/gcs/core.clj")
 (refer 'gcs.core)
 
-(def gcs-file (->GCS "testbucket003" "some_folder/blah.txt" "This is a test content"))
+(def gcs-file-meta (->GcsMeta "testbucket003" "some_folder/blah.txt"))
 
-(upload gcs-file)
-(get-contents (assoc gcs-file :content "nothing"))
+(upload gcs-file-meta "This is a test content")
 
-(->> (get-access-token) 
-     (upload gcs-file) 
-     :body 
-     (json/read-str))
-(-> (ops/get-object-contents {:bucket "testbucket003" 
-                       :filename "some_folder%2Fblah.txt" 
-                       :access-token (get-access-token)}) 
-    :body)
-(-> (get-object-metadata 
-      {:bucket "testbucket003" 
-       :filename "some_folder%2Fblah.txt" 
-       :access-token (get-access-token)}) 
-    :body)
+(get-contents gcs-file-meta)
 
 (delete {:bucket "testbucket003" 
          :filename "some_folder%2Fblah.txt" 

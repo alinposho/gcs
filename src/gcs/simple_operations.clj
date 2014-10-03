@@ -9,7 +9,7 @@
   "Uploads a file that has a small content to the Google Cloud Storage 
    bucket using the access token"
   [{:keys [bucket filename content]} access-token]
-  (let [url (str "https://www.googleapis.com/upload/storage/v1beta2/b/" bucket "/o?uploadType=media&name=" filename)]
+  (let [url (str "https://www.googleapis.com/upload/storage/v1/b/" bucket "/o?uploadType=media&name=" filename)]
   (client/post url
                {:body content
                 :content-type "text/plain"
@@ -24,7 +24,7 @@
 params is set to ?alt=media or not, respectively.
 Please note that the filename should be URL encoded"
   [{:keys [bucket filename access-token params]}]
-  (let [url (str "https://www.googleapis.com/storage/v1beta2/b/" bucket "/o/" filename params)]
+  (let [url (str "https://www.googleapis.com/storage/v1/b/" bucket "/o/" filename params)]
     (client/get url
                 {:headers {"Authorization" (str "Bearer " access-token)}
                  :throw-entire-message? true})))

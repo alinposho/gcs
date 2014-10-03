@@ -1,5 +1,5 @@
 (ns gcs.core
-  (:require 
+  (:require
     [clj-http.client :as client]
     [clj-jwt.key   :refer [private-key]]
     [clojure.data.json :as json]
@@ -13,7 +13,7 @@
 	(get-contents [this] "Gets the contents of the specified object from the Google Cloud Storage.
 		Please note that the filename should be URL encoded")
 	(get-metadata [this] "Gets the metadata of the specified object from the Google Cloud Storage")
-	(delete [this] "Deletes an object and its metadata. 
+	(delete [this] "Deletes an object and its metadata.
 		Deletions are permanent if versioning is not enabled for the bucket, or if the generation parameter is used.")
 	)
 
@@ -21,14 +21,21 @@
 
 (extend-type GcsMeta
 	GcsOps
-	(upload [this content]  
+	(upload [this content]
  		 (ops/upload (assoc this :content content) (get-access-token)))
 	(get-contents [this]
 		(let [url-encoded-filename (URLEncoder/encode (:filename this) "UTF-8")
           access-token (get-access-token)
           req-params (assoc this :filename url-encoded-filename :access-token access-token)]
-		{:content (-> (ops/get-object-contents req-params) 
-                  :body)}))
+      (-> (ops/get-object-contents req-params)
+                  :body)))
+  (get-metadata [this]
+    (let [url-encoded-filename (URLEncoder/encode (:filename this) "UTF-8")
+          access-token (get-access-token)
+          req-params (assoc this :filename url-encoded-filename :access-token access-token)]
+		(-> (ops/get-object-metadata req-params)
+        :body
+        (json/read-str))))
   (delete [this]
     (let [url-encoded-filename (URLEncoder/encode (:filename this) "UTF-8")
           access-token (get-access-token)
@@ -46,8 +53,11 @@
 
 (get-contents gcs-file-meta)
 
-(delete {:bucket "testbucket003" 
-         :filename "some_folder%2Fblah.txt" 
-         :access-token (get-access-token)}) 
+(get-metadata gcs-file-meta)
+
+(delete gcs-file-meta)
+
+(get-contents gcs-file-meta)
+
 
 )

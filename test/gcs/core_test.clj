@@ -15,4 +15,3 @@
       (is (= (:filename gcs-file-meta) ((get-metadata gcs-file-meta) "name")))
       (is (= 204 (:status (delete gcs-file-meta)))))))
 
-(test-gcs-crud-ops)

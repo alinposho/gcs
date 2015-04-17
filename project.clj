@@ -6,4 +6,5 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [clj-jwt "0.0.4"]
                  [clj-http "0.9.1"]
-                 [org.clojure/data.json "0.2.4"]])
+                 [org.clojure/data.json "0.2.4"]
+                 [base64-clj "0.1.1"]])

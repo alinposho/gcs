@@ -1,6 +1,5 @@
 (ns gcs.config
   (:use [clojure.java.io :only (reader resource)])
-  (:require [clojure.string :as str])
   (:import (java.util Properties)))
 
 (defn load-properties [src]
@@ -20,7 +19,7 @@
 
 (defrecord GcsConfig [client-email permission-scope])
 
-(defn read-gcs-config 
+(defn read-gcs-config
   "Read the GCS configuration from the file system"
   []
   (let [props (read-config)]
@@ -28,13 +27,10 @@
 
 (comment
 
-(load-file "src/gcs/config.clj")
-(refer 'gcs.read-config)
-(client-email (config))
-(permission-scope (config))
+ (config/client-email (config/config))
+ (config/permission-scope (config/config))
 
-(def gcs-config (read-gcs-config))
-(:client-email gcs-config)
-(:permission-scope gcs-config)
 
-)
+ (def gcs-config (read-gcs-config))
+ (:client-email gcs-config)
+ (:permission-scope gcs-config))
